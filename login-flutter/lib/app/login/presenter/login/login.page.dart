@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:login/app/login/domain/entities/dados-login.entity.dart';
+import 'package:login/app/login/domain/usecase/login.usecase.dart';
+import 'package:login/shared/helpers/result.helper.dart';
 import 'package:login/shared/services/context.service.dart';
+import 'package:login/shared/services/launcher.service.dart';
 import 'package:login/shared/services/modular.service.dart';
 import 'package:login/shared/stores/login.store.dart';
 import 'package:login/shared/theme/colors.dart';
@@ -13,13 +17,17 @@ enum TypeInputField { text, search, restricted, email, cpf, numero, phone, cep, 
 class LoginPage extends StatefulWidget {
   final ModularService modularService;
   final ContextService contextService;
+  final LauncherService launcherService;
   final LoginStore store;
+  final LoginUsecase loginUsecase;
 
   const LoginPage({
     Key? key,
     required this.modularService,
     required this.contextService,
+    required this.launcherService,
     required this.store,
+    required this.loginUsecase,
   }) : super(key: key);
 
   @override
@@ -32,6 +40,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   late final FocusNode focus;
   bool isInputValid = true;
   bool isInputDisabled = false;
+  String usernameError = '';
+  String passwordError = '';
+  bool showErrorMessage = false;
 
   @override
   void initState() {
@@ -66,7 +77,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    height: 200,
+                    height: 220,
                     width: 300,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +100,20 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           cursorColor: ColorsTheme.mainSecondary,
                           decoration: InputDecoration(
                               alignLabelWithHint: true,
-                              // labelText: widget.label,
+                              prefixIcon: const Icon(
+                                Icons.person,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                              contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  borderSide: const BorderSide(width: 1)),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide:
+                                    const BorderSide(width: 1, color: ColorsTheme.mainSecondary),
+                              ),
                               labelStyle: const TextStyle(
                                   fontWeight: FontWeightTheme.regular,
                                   fontSize: FontSizeTheme.paragraphMediumRegular,
@@ -119,12 +143,25 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           textAlignVertical: TextAlignVertical.center,
                           onChanged: (e) => onChangedPassword(text: e, isValid: isInputValid),
                           maxLines: 1,
+                          obscureText: true,
                           maxLength: 20,
                           cursorColor: ColorsTheme.mainSecondary,
                           decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.lock,
+                                color: Colors.black,
+                                size: 20,
+                              ),
                               alignLabelWithHint: true,
                               contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                              border: const UnderlineInputBorder(),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  borderSide: const BorderSide(width: 1)),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                                borderSide:
+                                    const BorderSide(width: 1, color: ColorsTheme.mainSecondary),
+                              ),
                               labelStyle: const TextStyle(
                                   fontWeight: FontWeightTheme.regular,
                                   fontSize: FontSizeTheme.paragraphMediumRegular,
@@ -138,11 +175,28 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                               filled: true,
                               counterText: ""),
                         ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 20,
+                          child: Text(
+                            usernameError,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                          child: Text(
+                            passwordError,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   ElevatedButton(
-                      onPressed: () => {},
+                      onPressed: () => onSubmit(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 72, 165, 81),
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -156,16 +210,22 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 20.0, bottom: 20),
-            child: CustomText(
-              textAlign: TextAlign.start,
-              maxLines: 2,
-              color: ColorsTheme.neutral10,
-              type: CustomTexts.paragraphXSmallRegular,
-              text: "Política de privacidade",
+          Padding(
+            padding: const EdgeInsets.only(top: 20.0, bottom: 20),
+            child: GestureDetector(
+              onTap: () => widget.launcherService.launch('https://www.google.com.br'),
+              child: const Padding(
+                padding: EdgeInsets.only(top: 20.0, bottom: 20),
+                child: CustomText(
+                  textAlign: TextAlign.start,
+                  maxLines: 2,
+                  color: ColorsTheme.neutral10,
+                  type: CustomTexts.paragraphXSmallRegular,
+                  text: "Política de privacidade",
+                ),
+              ),
             ),
-          ),
+          )
         ],
       ),
     ));
@@ -183,6 +243,63 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     setState(() {
       isInputValid = !isValid;
     });
+  }
+
+  void onSubmit() async {
+    if (_validateInputs()) {
+      DadosLogin dados;
+
+      dados = DadosLogin(
+        username: widget.store.user.username,
+        password: widget.store.user.username,
+      );
+      var loginResult = await widget.loginUsecase.login(dados);
+
+      if (loginResult.isSuccess()) {
+        // widget.modularService.pushNamed('/page');
+      }
+    } else {
+      print('Login inválido');
+    }
+  }
+
+  bool _validateInputs() {
+    bool isValid = true;
+
+    if (!hasUsernameText) {
+      isValid = false;
+      usernameError = 'Campo de usuário é obrigatório.';
+    } else if (controllerUsername.text.length < 2 || controllerUsername.text.length > 20) {
+      isValid = false;
+      usernameError = 'O nome de usuário deve ter entre 2 e 20 caracteres.';
+    } else if (controllerUsername.text.endsWith(' ')) {
+      isValid = false;
+      usernameError = 'O nome de usuário não pode terminar com um espaço.';
+    } else {
+      usernameError = '';
+    }
+
+    if (!hasPasswordText) {
+      isValid = false;
+      passwordError = 'Campo de senha é obrigatório.';
+    } else if (controllerPassword.text.length < 2 || controllerPassword.text.length > 20) {
+      isValid = false;
+      passwordError = 'A senha deve ter entre 2 e 20 caracteres.';
+    } else if (controllerPassword.text.endsWith(' ')) {
+      isValid = false;
+      passwordError = 'A senha não pode terminar com um espaço.';
+    } else if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(controllerPassword.text)) {
+      isValid = false;
+      passwordError = 'A senha não pode conter caracteres especiais.';
+    } else {
+      passwordError = '';
+    }
+
+    setState(() {
+      isInputValid = isValid;
+    });
+
+    return isValid;
   }
 
   bool get hasUsernameText => (controllerUsername.text).isNotEmpty;

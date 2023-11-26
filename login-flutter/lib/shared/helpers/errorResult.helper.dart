@@ -1,5 +1,8 @@
 // coverage:ignore-file
 
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:login/shared/enums/resultType.enum.dart';
 
@@ -21,6 +24,41 @@ class ErrorResult<T> extends Result<T> {
     List? validationErrors,
   }) : super(status) {
     this.validationErrors = validationErrors ?? [];
+  }
+
+  factory ErrorResult.fromErrorResponse(Response<dynamic>? response) {
+    if (response == null || response.data == null) {
+      return getDefaultError<T>();
+    }
+
+    Map<String, dynamic> jsonData;
+    if (response.statusCode == 401) {
+      return ErrorResult(response.statusCode.toResultType(),
+          code: "Unauthorized", message: "A sessão do usuário expirou.");
+    } else if (response.data is Map<String, dynamic>) {
+      jsonData = response.data as Map<String, dynamic>;
+    } else if (response.data is String && (response.data as String).isNotEmpty) {
+      try {
+        jsonData = json.decode(response.data as String) as Map<String, dynamic>;
+      } on FormatException catch (_) {
+        return getDefaultError<T>();
+      }
+    } else {
+      return getDefaultError<T>();
+    }
+
+    if (jsonData['error'] == null) {
+      return getDefaultError<T>();
+    }
+
+    var cookies = response.headers["set-cookie"];
+
+    return ErrorResult(response.statusCode.toResultType(),
+        code: jsonData['error']['code'] as String,
+        cookies: cookies,
+        message: jsonData['error']['message'] as String,
+        data: jsonData['error']['data'] as String?,
+        validationErrors: const []);
   }
 
   static ErrorResult<T> getDefaultError<T>() => ErrorResult<T>(ResultTypes.internalServerError,
