@@ -1,0 +1,19 @@
+{
+    "coverage-gutters.showGutterCoverage": false,
+    "coverage-gutters.showLineCoverage": true,
+    "coverage-gutters.showRulerCoverage": true,
+    "coverage-gutters.highlightdark": "rgba(0, 122, 30, 0.1)",
+    "coverage-gutters.noHighlightDark": "rgba(163, 0, 0, 0.1)",
+    "flutter-coverage.sufficientCoverageThreshold": 85,
+    "flutter-coverage.coverageFileNames": [
+        "lcov.info",
+        "cov.xml",
+        "coverage.xml",
+        "jacoco.xml"
+    ],
+    "flutter-coverage.coverageFilePaths": [
+        "coverage"
+    ],
+    "flutter-coverage.lowCoverageThreshold": 50,
+    "dart.lineLength": 120 
+} 
