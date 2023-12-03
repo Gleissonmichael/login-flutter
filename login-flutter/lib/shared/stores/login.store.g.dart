@@ -9,38 +9,6 @@ part of 'login.store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$LoginStore on LoginStoreBase, Store {
-  late final _$rememberAccessAtom =
-      Atom(name: 'LoginStoreBase.rememberAccess', context: context);
-
-  @override
-  bool get rememberAccess {
-    _$rememberAccessAtom.reportRead();
-    return super.rememberAccess;
-  }
-
-  @override
-  set rememberAccess(bool value) {
-    _$rememberAccessAtom.reportWrite(value, super.rememberAccess, () {
-      super.rememberAccess = value;
-    });
-  }
-
-  late final _$storageStateAtom =
-      Atom(name: 'LoginStoreBase.storageState', context: context);
-
-  @override
-  DataState<DadosLogin> get storageState {
-    _$storageStateAtom.reportRead();
-    return super.storageState;
-  }
-
-  @override
-  set storageState(DataState<DadosLogin> value) {
-    _$storageStateAtom.reportWrite(value, super.storageState, () {
-      super.storageState = value;
-    });
-  }
-
   late final _$userAtom = Atom(name: 'LoginStoreBase.user', context: context);
 
   @override
@@ -53,22 +21,6 @@ mixin _$LoginStore on LoginStoreBase, Store {
   set user(DadosLogin value) {
     _$userAtom.reportWrite(value, super.user, () {
       super.user = value;
-    });
-  }
-
-  late final _$loginTimeAtom =
-      Atom(name: 'LoginStoreBase.loginTime', context: context);
-
-  @override
-  DateTime get loginTime {
-    _$loginTimeAtom.reportRead();
-    return super.loginTime;
-  }
-
-  @override
-  set loginTime(DateTime value) {
-    _$loginTimeAtom.reportWrite(value, super.loginTime, () {
-      super.loginTime = value;
     });
   }
 
@@ -89,10 +41,7 @@ mixin _$LoginStore on LoginStoreBase, Store {
   @override
   String toString() {
     return '''
-rememberAccess: ${rememberAccess},
-storageState: ${storageState},
-user: ${user},
-loginTime: ${loginTime}
+user: ${user}
     ''';
   }
 }

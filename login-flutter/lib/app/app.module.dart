@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:login/app/infos/infos.module.dart';
 import 'package:login/app/login/domain/repositories/login.repository.dart';
 import 'package:login/app/login/domain/usecase/login.usecase.dart';
 import 'package:login/app/login/domain/usecase/login.usecase_impl.dart';
@@ -44,6 +45,6 @@ class AppModule extends Module {
   @override
   final List<ModularRoute> routes = [
     ModuleRoute(Modular.initialRoute, module: LoginModule()),
-    ModuleRoute('/info', module: LoginModule()),
+    ModuleRoute('/infos', module: InfosModule()),
   ];
 }

@@ -198,7 +198,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   ElevatedButton(
                       onPressed: () => onSubmit(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 72, 165, 81),
+                        backgroundColor: const Color(0xFF44bd6e),
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40.0),
@@ -256,7 +256,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       var loginResult = await widget.loginUsecase.login(dados);
 
       if (loginResult.isSuccess()) {
-        // widget.modularService.pushNamed('/page');
+        widget.modularService.pushNamed('/infos');
       }
     } else {
       print('Login inválido');

@@ -46,6 +46,7 @@ dependencies:
   modular_core: ^2.0.3+1
   json_annotation: ^4.8.1
   http_mock_adapter: ^0.3.3
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

@@ -21,7 +21,7 @@ class SplashScreenPage extends StatelessWidget {
             ),
             CustomText(
               type: CustomTexts.paragraphBigRegular,
-              text: 'App',
+              text: 'Aplicativo exemplo - Login Flutter',
               color: ColorsTheme.neutral10,
             ),
           ],
